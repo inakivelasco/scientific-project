@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # Model specification
     modelName = 'faster_rcnn_R_50_FPN_3x'
     annotationName = 'Animal'
-    version = 1
+    version = 2
 
     dataDir = os.path.abspath(os.path.join(os.pardir, 'dataset'))
     annTrain = os.path.join(dataDir, 'annotations', f'instances{annotationName}_train2017.json')
@@ -46,10 +46,10 @@ if __name__ == "__main__":
     cfg.DATALOADER.NUM_WORKERS = 2
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(f"COCO-Detection/{modelName}.yaml")  # Let training initialize from model zoo
     cfg.SOLVER.IMS_PER_BATCH = 2
-    cfg.SOLVER.BASE_LR = 0.001  # (previous value: 0.00025) pick a good LR
+    cfg.SOLVER.BASE_LR = 0.00025  # (previous value: 0.00025) pick a good LR
 
     # cfg.SOLVER.WARMUP_ITERS = 300
-    cfg.SOLVER.MAX_ITER = 300    # 300 iterations seems good enough for this toy dataset; you will need to train longer for a practical dataset
+    cfg.SOLVER.MAX_ITER = 1500    # 300 iterations seems good enough for this toy dataset; you will need to train longer for a practical dataset
     cfg.SOLVER.STEPS = ()       # do not decay learning rate, or when to decay it?
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 64   # (previous value: 128) faster, and good enough for this toy dataset (default: 512)
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 10
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     # Inference and evaluation
     cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.75
     predictor = DefaultPredictor(cfg)
 
     dataset_dicts = DatasetCatalog.get("my_dataset_val")
@@ -73,15 +73,12 @@ if __name__ == "__main__":
     for i, d in enumerate(random.sample(dataset_dicts, 3)):
         im = cv2.imread(d["file_name"])
         outputs = predictor(im)
-        v = Visualizer(im[:, :, ::-1],
-                       metadata=my_dataset_metadata,
-                       scale=0.8
-                       )
+        v = Visualizer(im[:, :, ::-1], metadata=my_dataset_metadata, scale=0.8)
         out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     #     cv2.imshow(f'image {i}', out.get_image()[:, :, ::-1])
     # cv2.waitKey()
 
-    evaluator = COCOEvaluator("my_dataset_val", output_dir=cfg.OUTPUT_DIR)
+    evaluator = COCOEvaluator("my_dataset_val", cfg, False, output_dir=cfg.OUTPUT_DIR)
     val_loader = build_detection_test_loader(cfg, "my_dataset_val")
     inference = inference_on_dataset(predictor.model, val_loader, evaluator)
     print(inference)

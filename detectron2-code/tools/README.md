@@ -1,1 +1,1 @@
-README for detectron2 code
+README for detectron2-code/tools files

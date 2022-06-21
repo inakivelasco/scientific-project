@@ -10,11 +10,11 @@ dataloader.train.mapper.use_instance_mask = False
 optimizer.lr = 0.001  # Default 0.01
 
 model.backbone.bottom_up.freeze_at = 2
-model.num_classes = 3  # Default 2
-dataloader.train.total_batch_size = 2  # Default 4
+model.num_classes = 3
+dataloader.train.total_batch_size = 2
 
 # train.init_checkpoint = "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/model_final.pth"
-# train.init_checkpoint = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
-train.init_checkpoint = "/Scientific-Project/models/fcos_R_50_FPN_1x_v00/model_final.pth"
+# train.init_checkpoint = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"  # Use this one for the first train
+train.init_checkpoint = "/Scientific-Project/models/fcos_R_50_FPN_1x_v00/model_final.pth"  # Get previous checkpoint
 
 # print('hold')

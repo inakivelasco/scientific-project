@@ -2,7 +2,7 @@
 
 
 This project is based in the detectron2 repository (https://github.com/facebookresearch/detectron2). It consists of a general pipeline with the following steps:
-![](/docs/pipeline.png)
+![Pipeline](/docs/pipeline.png)
 
 
 ## Generated report
@@ -19,4 +19,6 @@ Some report examples are available in the [reports folder](/reports).
 ## Usage instructions
 ### Previous considerations
 #### Dataset structure
-asdf
+The actual code requires a specific structure for the folder containing the evaluating dataset:
+
+![Dataset structure](/docs/datasetStructure.jpg)

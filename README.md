@@ -4,7 +4,7 @@
 This project is based in the detectron2 repository (https://github.com/facebookresearch/detectron2). It consists of a general pipeline with the following steps:
 
 ![Pipeline](/docs/pipeline.png)
-
+It is aimed to work with real and synthetic datasets.
 
 
 ## Generated report
@@ -19,6 +19,11 @@ Some report examples are available in the [reports folder](/reports).
 
 
 ## Previous considerations
+***Some scripts could stop working if these considerations are not taken into account.***
+### Model specification
+This project currently works with **fcos_R_50_FPN_1x** object detection model.
+### Dataset specification
+This project currently works with an specific kind of dataset containing images for three different classes: **bark**, **maize** and **weeds**.
 ### Images and annotations format
 This project currently works with COCO format annotations.
 ### Dataset structure

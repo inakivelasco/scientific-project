@@ -59,8 +59,27 @@ def drawImage(imagePath : str, x: int, y: int, title: str, figureIdx: int, width
     image = ImageReader(imagePath)
     report.drawImage(image, x, y, width=width, height=height,
                      preserveAspectRatio=True)
-    figureIdx = drawFigureTitle(x + width / 2, lineHeight, title, figureIdx)
+    figureIdx = drawFigureTitle(x + width // 2, y, title, figureIdx)
     return figureIdx
+
+def draw2PlotsPerLine(plotSpecificFolder: str, generalTitle: str, plotFilenames: list, figureTitles: list,
+                      lineHeight: int, figureIdx: int):
+    lineHeight = drawBoldString(20 * mm, lineHeight, generalTitle, 16, 5)
+
+    plotsDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'plots', plotSpecificFolder))
+
+    for i, plotName in enumerate(plotFilenames):
+        if i % 2 == 0:
+            if i == 0:
+                lineHeight = changeLineHeight(lineHeight, 20)
+            else:
+                lineHeight = changeLineHeight(lineHeight, 18)
+            lineHeight = checkImageFits(lineHeight, 72 * mm)
+            figureIdx = drawImage(os.path.join(plotsDir, plotName), 20 * mm, lineHeight, figureTitles[i], figureIdx)
+        else:
+            figureIdx = drawImage(os.path.join(plotsDir, plotName), 116 * mm, lineHeight, figureTitles[i], figureIdx)
+
+    return lineHeight, figureIdx
 
 def writeModelArchitecture(modelArchPath: str):
     # This function is UNUSED in this script
@@ -87,10 +106,10 @@ if __name__ == "__main__":
     datasetName = datasetDir.replace('\\', '/').split('/')[-1]
     extraIntro = args.extra_intro_dir
 
+    # PDF general settings ---------------------------------------------------------------------------------------------
     fileName = f'report_{modelName}_{datasetName}.pdf'
     documentTitle = 'Scientific Project report'
 
-    # PDF general settings
     font = 'Helvetica'
     fontSize = 12
     topMargin = 280 * mm
@@ -125,43 +144,19 @@ if __name__ == "__main__":
     lineHeight = writeParagraph(extraIntro, lineHeight)
 
     # Train Plots ------------------------------------------------------------------------------------------------------
-    lineHeight = drawBoldString(20 * mm, lineHeight, 'Train plots', 16, 5)
-
-    trainPlotsDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'plots', 'train'))
-
-    lineHeight = changeLineHeight(lineHeight, 20)
-    lineHeight = checkImageFits(lineHeight, 72 * mm)
-    figureIdx = drawImage(os.path.join(trainPlotsDir, 'classDistributionPiePlot.png'), 20 * mm, lineHeight,
-                          'Class distribution for validation dataset', figureIdx)
-
-    figureIdx = drawImage(os.path.join(trainPlotsDir, 'apAndDistributionPerClassBarPlot.png'), 116 * mm, lineHeight,
-                          'AP and percentage distribution per class', figureIdx)
-
-    lineHeight = changeLineHeight(lineHeight, 18)
-    lineHeight = checkImageFits(lineHeight, 72 * mm)
-    figureIdx = drawImage(os.path.join(trainPlotsDir, 'apsHrzBarPlot.png'), 20 * mm, lineHeight,
-                          'General AP metrics', figureIdx)
-
-    figureIdx = drawImage(os.path.join(trainPlotsDir, 'totalLossPerIter.png'), 116 * mm, lineHeight,
-                          'Training total loss per iteration', figureIdx)
+    trainPlotFilenames = ['classDistributionPiePlot.png', 'apAndDistributionPerClassBarPlot.png', 'apsHrzBarPlot.png',
+                          'totalLossPerIter.png']
+    trainFigureTitles = ['Class distribution for validation dataset', 'AP and percentage distribution per class',
+                         'General AP metrics', 'Training total loss per iteration']
+    lineHeight, figureIdx = draw2PlotsPerLine('train', 'Train plots', trainPlotFilenames, trainFigureTitles, lineHeight,
+                                              figureIdx)
 
     # Dataset Plots ----------------------------------------------------------------------------------------------------
-    lineHeight = drawBoldString(20 * mm, lineHeight, f'Dataset plots [{datasetName}]', 16, 5)
-
-    datasetPlotsDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'plots', datasetName))
-
-    lineHeight = changeLineHeight(lineHeight, 20)
-    lineHeight = checkImageFits(lineHeight, 72 * mm)
-    figureIdx = drawImage(os.path.join(datasetPlotsDir, 'classDistributionPiePlot.png'), 20 * mm, lineHeight,
-                          f'Class distribution for {datasetName} dataset', figureIdx)
-
-    figureIdx = drawImage(os.path.join(datasetPlotsDir, 'apAndDistributionPerClassBarPlot.png'), 116 * mm, lineHeight,
-                          'AP and percentage distribution per class', figureIdx)
-
-    lineHeight = changeLineHeight(lineHeight, 18)
-    lineHeight = checkImageFits(lineHeight, 72 * mm)
-    figureIdx = drawImage(os.path.join(datasetPlotsDir, 'apsHrzBarPlot.png'), 20 * mm, lineHeight,
-                          'General AP metrics', figureIdx)
+    datasetPlotFilenames = ['classDistributionPiePlot.png', 'apAndDistributionPerClassBarPlot.png', 'apsHrzBarPlot.png']
+    datasetFigureTitles = [f'Class distribution for {datasetName} dataset', 'AP and percentage distribution per class',
+                           'General AP metrics']
+    lineHeight, figureIdx = draw2PlotsPerLine(datasetName, f'Dataset plots [{datasetName}]', datasetPlotFilenames,
+                                              datasetFigureTitles, lineHeight, figureIdx)
 
     # Classified images ------------------------------------------------------------------------------------------------
     predictedImagesDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'evaluation', datasetName,
@@ -177,14 +172,15 @@ if __name__ == "__main__":
 
     lineHeight = drawBoldString(20 * mm, lineHeight, 'Predictions for every class', 14, 3)
     for i, imagePath in enumerate(random.sample(mainImages, 4)):
+        imageName = imagePath.replace('\\', '/').split('/')[-1]
         if i % 2 == 0:
             lineHeight = changeLineHeight(lineHeight, 18)
             lineHeight = checkImageFits(lineHeight, 72 * mm)
-            figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for every class', figureIdx)
+            figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for every class [{imageName}]', figureIdx)
         else:
-            figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for every class', figureIdx)
+            figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for every class [{imageName}]', figureIdx)
 
-    classLabels = ['Bark', 'Maize', 'Weeds']
+    classLabels = ['Bark', 'Maize', 'Weeds']  # HARDCODED
     for classLabel in classLabels:
         lineHeight = drawBoldString(20 * mm, lineHeight, classLabel, 14, 3)
         for i, imageName in enumerate(random.sample(os.listdir(os.path.join(predictedImagesDir, classLabel)), 4)):
@@ -192,8 +188,8 @@ if __name__ == "__main__":
             if i % 2 == 0:
                 lineHeight = changeLineHeight(lineHeight, 18)
                 lineHeight = checkImageFits(lineHeight, 72 * mm)
-                figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for {classLabel}', figureIdx)
+                figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]', figureIdx)
             else:
-                figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for {classLabel}', figureIdx)
+                figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]', figureIdx)
 
     report.save()

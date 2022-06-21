@@ -59,3 +59,4 @@ Previous changes:
 - Adjust args parameters: --model-name and --dataset-dir
 
 `generateReport.py --model-name fcos_R_50_FPN_1x_v01 --dataset-dir C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/test`
+

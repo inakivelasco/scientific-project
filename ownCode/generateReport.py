@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse, os, random, sys
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
@@ -176,9 +177,11 @@ if __name__ == "__main__":
         if i % 2 == 0:
             lineHeight = changeLineHeight(lineHeight, 18)
             lineHeight = checkImageFits(lineHeight, 72 * mm)
-            figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for every class [{imageName}]', figureIdx)
+            figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for every class [{imageName}]',
+                                  figureIdx)
         else:
-            figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for every class [{imageName}]', figureIdx)
+            figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for every class [{imageName}]',
+                                  figureIdx)
 
     classLabels = ['Bark', 'Maize', 'Weeds']  # HARDCODED
     for classLabel in classLabels:
@@ -188,8 +191,10 @@ if __name__ == "__main__":
             if i % 2 == 0:
                 lineHeight = changeLineHeight(lineHeight, 18)
                 lineHeight = checkImageFits(lineHeight, 72 * mm)
-                figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]', figureIdx)
+                figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]',
+                                      figureIdx)
             else:
-                figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]', figureIdx)
+                figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]',
+                                      figureIdx)
 
     report.save()

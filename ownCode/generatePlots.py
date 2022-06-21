@@ -1,15 +1,7 @@
-import argparse, json, os, sys
+#!/usr/bin/env python
+import argparse, json, os
 import numpy as np
 import matplotlib.pyplot as plt
-from pycocotools.coco import COCO
-from detectron2.config import get_cfg
-from pycocotools.cocoeval import COCOeval
-from detectron2.engine import DefaultPredictor
-from detectron2.utils.logger import setup_logger
-from detectron2.data.datasets import register_coco_instances
-from detectron2.evaluation import COCOEvaluator, inference_on_dataset
-from detectron2.data import build_detection_test_loader, DatasetCatalog, MetadataCatalog
-
 
 def showPercentagePiePlot(pct, allvalues):
     #  Function to show percentage and absolute value in the pie plot
@@ -226,28 +218,19 @@ if __name__ == "__main__":
     parser.add_argument("--dataset-name", help="Dataset name (type str)", type=str, required=True)
     args = parser.parse_args()
 
-    # Model specification -----
     modelName = args.model_name
     datasetName = args.dataset_name
 
-    # Prepare directories -----
-    modelDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName))  # FCOS
-    datasetEvaluationDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'evaluation', datasetName))  # FCOS
-    # imagesValDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/images'
-    # annValDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/newAnnotationsVal.json'
-    # datasetImagesDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/images'
-    # datasetAnnDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/newAnnotationsVal.json'
-
-    # testDir = os.path.join(modelDir, 'test')
-    # os.makedirs(testDir, exist_ok=True)  # TODO cambiar el exist_ok a False
-    # setup_logger(output=os.path.join(testDir, 'testLog.txt'))  # TODO add this to train
+    # Prepare directories ----------------------------------------------------------------------------------------------
+    modelDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName))
+    datasetEvaluationDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'evaluation', datasetName))
 
     trainPlotDir = os.path.join(modelDir, 'plots', 'train')
     datasetPlotDir = os.path.join(modelDir, 'plots', datasetName)
     os.makedirs(trainPlotDir, exist_ok=True)
     os.makedirs(datasetPlotDir, exist_ok=True)
 
-    # Train graphs -----
+    # Train graphs -----------------------------------------------------------------------------------------------------
     # Graphs pre-inference -----
     with open(os.path.join(modelDir, 'metrics.json'), 'r') as f:
         metrics = [json.loads(line) for line in f]
@@ -299,7 +282,8 @@ if __name__ == "__main__":
 
     # Dataset graphs ---------------------------------------------------------------------------------------------------
     # Pie plot for class distribution (the count for some classes is incorrect, just by 1)
-    classNames, nClassInstances = getPiePlotClassDistributionAndSaveDataset(datasetEvaluationDir, datasetPlotDir, datasetName)
+    classNames, nClassInstances = getPiePlotClassDistributionAndSaveDataset(datasetEvaluationDir, datasetPlotDir,
+                                                                            datasetName)
 
     # Bar plot for AP per category
     getBarPlotApPerCategoryAndSaveDataset(datasetEvaluationDir, datasetPlotDir)

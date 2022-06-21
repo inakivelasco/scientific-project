@@ -31,21 +31,12 @@ def register_dataset():
     # register_coco_instances("maize_train", {},
     #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_train.json",
     #                         "/media/naeem/T7/datasets/maize_data_coco")
-    # register_coco_instances("maize_train", {},
-    #                         "/../../../Scientific-Project/dataset/annotations/instancesAnimal_train2017.json",
-    #                         "/../../../Scientific-Project/dataset/images/train2017")
     register_coco_instances("maize_train", {},
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/trainNewAnnotations.json',
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/images')
     # register_coco_instances("maize_valid", {},
     #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_val.json",
     #                         "/media/naeem/T7/datasets/maize_data_coco")
-    # register_coco_instances("maize_valid", {},
-    #                         "/../../../Scientific-Project/dataset/annotations/instancesAnimal_val2017.json",
-    #                         "/../../../Scientific-Project/dataset/images/val2017")
-    # register_coco_instances("maize_valid", {},
-    #                         'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/valNewAnnotations.json',
-    #                         'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/images')
     register_coco_instances("maize_valid", {},
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/test/testNewAnnotations.json',
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/test/images')
@@ -57,15 +48,13 @@ def do_test(cfg, model):
     print_csv_format(ret)
     return ret
 
+
 args = default_argument_parser().parse_args()
-# cfg_file = "../configs/COCO-Detection/fcos_R_50_FPN_1x_maize.py"
-# cfg = LazyConfig.load(cfg_file)
-cfg = LazyConfig.load(args.config_file)  # Added by inaki, Default the two lines above
-# trained_iter = int(cfg.train.init_checkpoint.split('-')[-1].split('/')[0])  # Added by inaki
-model_name = args.config_file.split('/')[-2]
-cfg.train.output_dir = f"/Scientific-Project/models/{model_name}/evaluation/val"  # Default "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
-cfg.train.output_dir = f"/Scientific-Project/models/{model_name}/evaluation/test"  # Default "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
-cfg.dataloader.test.num_workers = 0 # for debugging
+cfg = LazyConfig.load(args.config_file)
+model_name = args.config_file.split('/')[-2]  # Assuming the config.yaml file is saved in a folder named as the model
+# cfg.train.output_dir = "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
+cfg.train.output_dir = os.path.join(os.pardir, os.pardir, 'models', model_name, 'evaluation', 'test')
+cfg.dataloader.test.num_workers = 0  # for debugging
 # cfg = LazyConfig.apply_overrides(cfg, args.opts)
 default_setup(cfg, args)
 register_dataset()
@@ -75,34 +64,34 @@ model.to(cfg.train.device)
 # model = create_ddp_model(model)
 DetectionCheckpointer(model).load(cfg.train.init_checkpoint)
 
-do_test(cfg, model)  # Added by inaki
+do_test(cfg, model)
 
-# Added by inaki
 imagesDir = os.path.join(cfg.train.output_dir, 'images')
 os.makedirs(imagesDir, exist_ok=True)
 
 eval_loader = instantiate(cfg.dataloader.test)
 model.eval()
-# class_labels = np.array(['bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe'])  # Added by inaki, hardcoded
-class_labels = np.array(['Weeds', 'Maize', 'Bark'])  # Added by inaki, hardcoded
+class_labels = np.array(['Weeds', 'Maize', 'Bark'])  # HARDCODED
 for class_label in class_labels:
     os.makedirs(os.path.join(imagesDir, class_label), exist_ok=True)
 nImages2Save = 20
 for idx, inputs in enumerate(eval_loader):
+    if idx == nImages2Save:
+        break
+    # Images with predictions for every class
     outputs = model(inputs)
-    outputs_mask = outputs[0]['instances']._fields['scores'] > 0.5  # Added by inaki
+    outputs_mask = outputs[0]['instances']._fields['scores'] > 0.5
     image = cv2.imread(inputs[0]['file_name'])
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     v = Visualizer(image[:, :, ::-1], scale=1.2)
-    # out = v.draw_instance_predictions(outputs[0]['instances'][outputs_mask].to('cpu'))
 
-    detected_classes = outputs[0]['instances'][outputs_mask]._fields['pred_classes'].tolist()  # Added by inaki
-    detected_scores = outputs[0]['instances'][outputs_mask]._fields['scores'].tolist()  # Added by inaki
+    detected_classes = outputs[0]['instances'][outputs_mask]._fields['pred_classes'].tolist()
+    detected_scores = outputs[0]['instances'][outputs_mask]._fields['scores'].tolist()
     detected_scores = [round(score, 2) for score in detected_scores]
 
     labels = [f"{class_labels[detected_classes[i]]} {detected_scores[i]}" for i in range(len(detected_classes))]
     out = v.overlay_instances(boxes=outputs[0]['instances'][outputs_mask]._fields['pred_boxes'].to("cpu").tensor.detach().numpy(),
-                              labels=labels)  # Added by inaki, Default v.draw_instance_predictions
+                              labels=labels)
 
     # cv2.imshow(f'image{idx}', out.get_image())
     cv2.imwrite(os.path.join(imagesDir, f'image{idx}.jpg'), out.get_image())
@@ -114,15 +103,10 @@ for idx, inputs in enumerate(eval_loader):
     for classIdx in range(len(class_labels)):
         mask = [cls == classIdx for cls in detected_classes]
 
-        labels = [f"{class_labels[detected_classes[i]]} {detected_scores[i]}" for i in range(len(detected_classes))]
         v = Visualizer(image[:, :, ::-1], scale=1.2)
         out = v.overlay_instances(
             boxes=outputs[0]['instances'][outputs_mask][mask]._fields['pred_boxes'].to("cpu").tensor.detach().numpy(),
-            labels=np.array(labels)[mask])  # Added by inaki, Default v.draw_instance_predictions
+            labels=np.array(labels)[mask])
 
         cv2.imwrite(os.path.join(imagesDir, class_labels[classIdx], f'image{idx}.jpg'), out.get_image())
-
-    nImages2Save -= 1
-    if nImages2Save == 0:
-        break
 

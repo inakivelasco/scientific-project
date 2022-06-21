@@ -43,5 +43,11 @@ Previous possible changes:
 
 `lazyconfig_train_net.py --config-file ../configs/COCO-Detection/fcos_R_50_FPN_1x_maize.py --num-gpus 1 --num-machines 1`
 ### Stage 2: Evaluation
+Previous possible changes:
+- [evaluate_lazy_config.py](detectron2-code/tools/evaluate_lazy_config.py): adjust **register_dataset()** so that the train dataset is correct and the validation dataset is the dataset the user wants to evaluate. Adjust **cfg.train.output_dir** to match the corresponding output folder
+
+`evaluate_lazy_config.py --config-file ../../models/fcos_R_50_FPN_1x_v00/config.yaml --num-gpus 1`
 ### Stage 3: Plot generation
+`generatePlots.py --model-name fcos_R_50_FPN_1x_v01 --dataset-name test`
 ### Stage 4: Report generation
+`generateReport.py --model-name fcos_R_50_FPN_1x_v01 --dataset-dir C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/test`

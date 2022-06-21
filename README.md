@@ -12,4 +12,5 @@ A report will be generated at the end of the pipeline execution. It will include
 - Model training plots
 - Test plots using the provided dataset
 - Images & their predictions
-Some report examples are available at asdf
+
+Some report examples are available in the [reports folder](/reports)

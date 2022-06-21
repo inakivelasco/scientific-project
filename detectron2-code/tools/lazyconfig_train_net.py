@@ -109,18 +109,12 @@ def register_dataset():
     # register_coco_instances("maize_train", {},
     #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_train.json",
     #                         "/media/naeem/T7/datasets/maize_data_coco")
-    # register_coco_instances("maize_train", {},
-    #                         "/../../../Scientific-Project/dataset/annotations/instancesAnimal_train2017.json",
-    #                         "/../../../Scientific-Project/dataset/images/train2017")
     register_coco_instances("maize_train", {},
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/trainNewAnnotations.json',
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/images')
     # register_coco_instances("maize_valid", {},
     #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_val.json",
     #                         "/media/naeem/T7/datasets/maize_data_coco")
-    # register_coco_instances("maize_valid", {},
-    #                         "/../../../Scientific-Project/dataset/annotations/instancesAnimal_val2017.json",
-    #                         "/../../../Scientific-Project/dataset/images/val2017")
     register_coco_instances("maize_valid", {},
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/valNewAnnotations.json',
                             'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/images')
@@ -128,10 +122,15 @@ def register_dataset():
 
 def main(args):
     cfg = LazyConfig.load(args.config_file)
-    cfg.train.output_dir = f"/Scientific-Project/models/fcos_R_50_FPN_1x_v00"  # Default "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
+
+    # cfg.train.output_dir = "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
+    cfg.train.output_dir = os.path.join(os.pardir, os.pardir, 'models', 'fcos_R_50_FPN_1x_v00')
     while os.path.isdir(cfg.train.output_dir):
+        # This while changes the cfg.train.output_dir version number to the next one. It is just valid following the
+        # next format: modelName_vXX --> fcos_R_50_FPN_1x_v00
         nextVersion = str(int(cfg.train.output_dir.split('_')[-1][1:]) + 1).zfill(2)
         cfg.train.output_dir = f'{cfg.train.output_dir[:-2]}{nextVersion}'
+
     cfg.dataloader.test.num_workers = 0  # for debugging
     cfg = LazyConfig.apply_overrides(cfg, args.opts)
     default_setup(cfg, args)

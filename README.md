@@ -13,4 +13,10 @@ A report will be generated at the end of the pipeline execution. It will include
 - Test plots using the provided dataset
 - Images & their predictions
 
-Some report examples are available in the [reports folder](/reports)
+Some report examples are available in the [reports folder](/reports).
+
+
+## Usage instructions
+### Previous considerations
+#### Dataset structure
+asdf

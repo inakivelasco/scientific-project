@@ -1,16 +1,11 @@
-import argparse, os, random
-
-# import reportlab
-import sys
-
+import argparse, os, random, sys
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Paragraph
-from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.utils import ImageReader
-
+from reportlab.lib.styles import ParagraphStyle
 
 def changeLineHeight(lineHeight: int, timesLineSpace: int):
     lineHeight -= timesLineSpace * lineSpace
@@ -81,8 +76,8 @@ def writeModelArchitecture(modelArchPath: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate report script')
-    parser.add_argument("--dataset-dir", help="Full dataset directory (type str)", type=str, required=True)
     parser.add_argument("--model-name", help="Model name (type str)", type=str, required=True)
+    parser.add_argument("--dataset-dir", help="Full dataset directory (type str)", type=str, required=True)
     parser.add_argument("--extra-intro-dir", help="Optional extra introduction text directory (type str)", type=str,
                         required=False, default='This is extra optional introduction. '*10)
     args = parser.parse_args()

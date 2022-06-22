@@ -83,7 +83,7 @@ def draw2PlotsPerLine(plotSpecificFolder: str, generalTitle: str, plotFilenames:
         else:
             drawImage(os.path.join(plotsDir, plotName), 116 * mm, figureTitles[i])
 
-def writeModelArchitecture(modelArchPath: str, pageNumber: int):
+def writeModelArchitecture(modelArchPath: str):
     # This function is UNUSED in this script
     global lineHeight
     nextPage()
@@ -169,6 +169,7 @@ if __name__ == "__main__":
     nextPage()
     drawBoldString(20 * mm, 'Images', 16)
 
+    # Images with predictions of every class -----
     drawBoldString(20 * mm, 'Predictions for every class', 14, 3)
     for i, imagePath in enumerate(random.sample(mainImages, 4)):
         imageName = imagePath.replace('\\', '/').split('/')[-1]
@@ -179,6 +180,7 @@ if __name__ == "__main__":
         else:
             drawImage(imagePath, 116 * mm, f'Predictions for every class [{imageName}]')
 
+    # Images with predictions for each class separately -----
     classLabels = ['Bark', 'Maize', 'Weeds']  # HARDCODED
     for classLabel in classLabels:
         drawBoldString(20 * mm, classLabel, 14, 3)

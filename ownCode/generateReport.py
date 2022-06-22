@@ -8,91 +8,91 @@ from reportlab.lib.enums import TA_JUSTIFY
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import ParagraphStyle
 
-def changeLineHeight(lineHeight: int, timesLineSpace: int):
+
+global lineHeight, figureIdx, pageNumber
+lineHeight = 200 * mm
+figureIdx = 1
+pageNumber = 1
+
+def changeLineHeight(timesLineSpace: int):
+    global lineHeight, pageNumber
     lineHeight -= timesLineSpace * lineSpace
     if lineHeight < bottomMargin:
-        report.showPage()
-        lineHeight = topMargin
-    return lineHeight
+        nextPage()
 
 def nextPage():
+    global lineHeight, pageNumber
     report.showPage()
+    report.drawRightString(report._pagesize[0] - 20*mm, bottomMargin, str(pageNumber))
     lineHeight = topMargin
-    return lineHeight
+    pageNumber += 1
 
-def drawBoldString(width: int, lineHeight: int, string: str, newSize: int = 12, timesLineSpace: int = 0):
-    lineHeight = changeLineHeight(lineHeight, timesLineSpace)
+def drawBoldString(width: int, string: str, newSize: int = 12, timesLineSpace: int = 0):
+    global lineHeight, pageNumber
+    changeLineHeight(timesLineSpace)
     report.setFont(f'{font}-Bold', newSize)
     report.drawString(width, lineHeight, string)
     report.setFont(font, fontSize)
-    return lineHeight
 
-def drawBoldCentredString(width: int, lineHeight: int, string: str, newSize: int = 12, timesLineSpace: int = 0):
-    lineHeight = changeLineHeight(lineHeight, timesLineSpace)
+def drawBoldCentredString(width: int, string: str, newSize: int = 12, timesLineSpace: int = 0):
+    global lineHeight
+    changeLineHeight(timesLineSpace)
     report.setFont(f'{font}-Bold', newSize)
     report.drawCentredString(width, lineHeight, string)
     report.setFont(font, fontSize)
-    return lineHeight
 
-def writeParagraph(text: str, lineHeight: int, newSize: int = 12):
+def writeParagraph(text: str, newSize: int = 12):
+    global lineHeight
     p = Paragraph(text, ParagraphStyle('intro', fontSize=newSize, alignment=TA_JUSTIFY))
     p.wrapOn(report, 500, lineSize)
-    lineHeight = changeLineHeight(lineHeight, len(p.blPara.lines) + 1)
+    changeLineHeight(len(p.blPara.lines) + 1)
     p.drawOn(report, 20 * mm, lineHeight)
-    return lineHeight
 
-def checkImageFits(lineHeight: int, imageHeight: int):
+def checkImageFits(imageHeight: int):
+    global lineHeight
     if lineHeight / mm + imageHeight / mm > topMargin / mm:
         lineHeight = topMargin - imageHeight
-    return lineHeight
 
-def drawFigureTitle(hrzFigCenter: int, height: int, string: str, figureIdx: int = None):
+def drawFigureTitle(hrzFigCenter: int, height: int, string: str):
+    global figureIdx
     report.setFont(font, 8)
-    if figureIdx is not None:
-        report.drawCentredString(hrzFigCenter, height, f'Figure {figureIdx}. {string}')
-        figureIdx += 1
-    else:
-        report.drawCentredString(hrzFigCenter, height, string)
+    report.drawCentredString(hrzFigCenter, height, f'Figure {figureIdx}. {string}')
+    figureIdx += 1
     report.setFont(font, fontSize)
-    return figureIdx
 
-def drawImage(imagePath : str, x: int, y: int, title: str, figureIdx: int, width: int = 72*mm, height: int = 72*mm):
+def drawImage(imagePath : str, x: int, title: str, width: int = 72*mm, height: int = 72*mm):
+    global lineHeight
     image = ImageReader(imagePath)
-    report.drawImage(image, x, y, width=width, height=height,
-                     preserveAspectRatio=True)
-    figureIdx = drawFigureTitle(x + width // 2, y, title, figureIdx)
-    return figureIdx
+    report.drawImage(image, x, lineHeight, width=width, height=height, preserveAspectRatio=True)
+    drawFigureTitle(x + width // 2, lineHeight, title)
 
-def draw2PlotsPerLine(plotSpecificFolder: str, generalTitle: str, plotFilenames: list, figureTitles: list,
-                      lineHeight: int, figureIdx: int):
-    lineHeight = drawBoldString(20 * mm, lineHeight, generalTitle, 16, 5)
+def draw2PlotsPerLine(plotSpecificFolder: str, generalTitle: str, plotFilenames: list, figureTitles: list):
+    global lineHeight, figureIdx
+    drawBoldString(20 * mm, generalTitle, 16, 5)
 
     plotsDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'plots', plotSpecificFolder))
 
     for i, plotName in enumerate(plotFilenames):
         if i % 2 == 0:
             if i == 0:
-                lineHeight = changeLineHeight(lineHeight, 20)
+                changeLineHeight(20)
             else:
-                lineHeight = changeLineHeight(lineHeight, 18)
-            lineHeight = checkImageFits(lineHeight, 72 * mm)
-            figureIdx = drawImage(os.path.join(plotsDir, plotName), 20 * mm, lineHeight, figureTitles[i], figureIdx)
+                changeLineHeight(18)
+            checkImageFits(72 * mm)
+            drawImage(os.path.join(plotsDir, plotName), 20 * mm, figureTitles[i])
         else:
-            figureIdx = drawImage(os.path.join(plotsDir, plotName), 116 * mm, lineHeight, figureTitles[i], figureIdx)
+            drawImage(os.path.join(plotsDir, plotName), 116 * mm, figureTitles[i])
 
-    return lineHeight, figureIdx
-
-def writeModelArchitecture(modelArchPath: str):
+def writeModelArchitecture(modelArchPath: str, pageNumber: int):
     # This function is UNUSED in this script
-    lineHeight = nextPage()
-    drawBoldString(20 * mm, lineHeight, 'Model Architecture', 16)
+    global lineHeight
+    nextPage()
+    drawBoldString(20 * mm, 'Model Architecture', 16)
     with open(modelArchPath, 'r') as f:
-        lineHeight = changeLineHeight(lineHeight, 2)
+        changeLineHeight(2)
         for line in f.readlines():
             report.drawString(20 * mm, lineHeight, line[:-1])
-            lineHeight = changeLineHeight(lineHeight, 1)
-    return lineHeight
-
+            changeLineHeight(1)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate report script')
@@ -118,46 +118,44 @@ if __name__ == "__main__":
     leftMargin = 20 * mm
     lineSize = 90
     lineSpace = 4 * mm
-    lineHeight = 280 * mm
-    figureIdx = 1
 
     # Generation -------------------------------------------------------------------------------------------------------
-    report = canvas.Canvas(os.path.abspath(os.path.join(os.pardir, 'reports', fileName)), pagesize=A4)
+    reportPath = os.path.abspath(os.path.join(os.pardir, 'reports', fileName))
+    report = canvas.Canvas(reportPath, pagesize=A4)
     report.setFont(font, fontSize)
     report.setTitle(documentTitle)
 
-    lineHeight = drawBoldCentredString(100 * mm, lineHeight, f'Report', 20)
-    lineHeight = drawBoldCentredString(100 * mm, lineHeight, f'Model: {modelName}', 16, 2)
-    lineHeight = drawBoldCentredString(100 * mm, lineHeight, f'Dataset: {datasetName}', 16, 2)
+    drawBoldCentredString(100 * mm, f'Report', 20)
+    drawBoldCentredString(100 * mm, f'Model: {modelName}', 16, 2)
+    drawBoldCentredString(100 * mm, f'Dataset: {datasetName}', 16, 2)
+    nextPage()
 
     # Introduction -----------------------------------------------------------------------------------------------------
-    lineHeight = 252 * mm
-    lineHeight = drawBoldString(20 * mm, lineHeight, 'Introduction', 16)
+    lineHeight = topMargin
+    drawBoldString(20 * mm, 'Introduction', 16)
 
-    lineHeight = drawBoldString(20 * mm, lineHeight, 'Dataset description', 14, 3)
+    drawBoldString(20 * mm, 'Dataset description', 14, 3)
     with open(os.path.join(datasetDir, 'description.txt'), 'r') as f:
-        lineHeight = writeParagraph(f.read(), lineHeight)
+        writeParagraph(f.read())
 
-    lineHeight = drawBoldString(20 * mm, lineHeight, 'Extra information', 14, 3)
+    drawBoldString(20 * mm, 'Extra information', 14, 3)
     if '--extra-intro-dir' in sys.argv:
         with open(args.extra_intro_dir, 'r') as f:
             extraIntro = f.read()
-    lineHeight = writeParagraph(extraIntro, lineHeight)
+    writeParagraph(extraIntro)
 
     # Train Plots ------------------------------------------------------------------------------------------------------
     trainPlotFilenames = ['classDistributionPiePlot.png', 'apAndDistributionPerClassBarPlot.png', 'apsHrzBarPlot.png',
                           'totalLossPerIter.png']
     trainFigureTitles = ['Class distribution for validation dataset', 'AP and percentage distribution per class',
                          'General AP metrics', 'Training total loss per iteration']
-    lineHeight, figureIdx = draw2PlotsPerLine('train', 'Train plots', trainPlotFilenames, trainFigureTitles, lineHeight,
-                                              figureIdx)
+    draw2PlotsPerLine('train', 'Train plots', trainPlotFilenames, trainFigureTitles)
 
     # Dataset Plots ----------------------------------------------------------------------------------------------------
     datasetPlotFilenames = ['classDistributionPiePlot.png', 'apAndDistributionPerClassBarPlot.png', 'apsHrzBarPlot.png']
     datasetFigureTitles = [f'Class distribution for {datasetName} dataset', 'AP and percentage distribution per class',
                            'General AP metrics']
-    lineHeight, figureIdx = draw2PlotsPerLine(datasetName, f'Dataset plots [{datasetName}]', datasetPlotFilenames,
-                                              datasetFigureTitles, lineHeight, figureIdx)
+    draw2PlotsPerLine(datasetName, f'Dataset plots [{datasetName}]', datasetPlotFilenames, datasetFigureTitles)
 
     # Classified images ------------------------------------------------------------------------------------------------
     predictedImagesDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'evaluation', datasetName,
@@ -168,33 +166,30 @@ if __name__ == "__main__":
         if os.path.isfile(os.path.join(predictedImagesDir, file)):
             mainImages.append(os.path.join(predictedImagesDir, file))
 
-    lineHeight = nextPage()
-    lineHeight = drawBoldString(20 * mm, lineHeight, 'Images', 16)
+    nextPage()
+    drawBoldString(20 * mm, 'Images', 16)
 
-    lineHeight = drawBoldString(20 * mm, lineHeight, 'Predictions for every class', 14, 3)
+    drawBoldString(20 * mm, 'Predictions for every class', 14, 3)
     for i, imagePath in enumerate(random.sample(mainImages, 4)):
         imageName = imagePath.replace('\\', '/').split('/')[-1]
         if i % 2 == 0:
-            lineHeight = changeLineHeight(lineHeight, 18)
-            lineHeight = checkImageFits(lineHeight, 72 * mm)
-            figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for every class [{imageName}]',
-                                  figureIdx)
+            changeLineHeight(18)
+            checkImageFits(72 * mm)
+            drawImage(imagePath, 20 * mm, f'Predictions for every class [{imageName}]')
         else:
-            figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for every class [{imageName}]',
-                                  figureIdx)
+            drawImage(imagePath, 116 * mm, f'Predictions for every class [{imageName}]')
 
     classLabels = ['Bark', 'Maize', 'Weeds']  # HARDCODED
     for classLabel in classLabels:
-        lineHeight = drawBoldString(20 * mm, lineHeight, classLabel, 14, 3)
+        drawBoldString(20 * mm, classLabel, 14, 3)
         for i, imageName in enumerate(random.sample(os.listdir(os.path.join(predictedImagesDir, classLabel)), 4)):
             imagePath = os.path.join(predictedImagesDir, classLabel, imageName)
             if i % 2 == 0:
-                lineHeight = changeLineHeight(lineHeight, 18)
-                lineHeight = checkImageFits(lineHeight, 72 * mm)
-                figureIdx = drawImage(imagePath, 20 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]',
-                                      figureIdx)
+                changeLineHeight(18)
+                checkImageFits(72 * mm)
+                drawImage(imagePath, 20 * mm, f'Predictions for {classLabel} [{imageName}]')
             else:
-                figureIdx = drawImage(imagePath, 116 * mm, lineHeight, f'Predictions for {classLabel} [{imageName}]',
-                                      figureIdx)
+                drawImage(imagePath, 116 * mm, f'Predictions for {classLabel} [{imageName}]')
 
     report.save()
+    print(f'Report generated in {reportPath}')

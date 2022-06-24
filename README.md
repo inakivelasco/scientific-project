@@ -20,6 +20,8 @@ Some report examples are available in the [reports folder](/reports).
 
 ## Previous considerations
 ***Some scripts could stop working if these considerations are not taken into account.***
+### Windows 11
+The whole project has been developed in Windows 11.
 ### Project structure
 The directories structure of the project is already defined and it is the same as this repository. Nevertheless, the detectron2 repository should be downloaded first and the corresponding files must be substituted with the ones of this project.
 ### Model specification

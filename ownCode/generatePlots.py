@@ -37,8 +37,11 @@ def getPiePlotClassDistributionAndSaveTrain(logDir, saveDir):
 
     plt.clf()
     plt.figure(figsize=(15, 9))
-    plt.pie(instances, labels=names, autopct=lambda pct: showPercentagePiePlot(pct, instances))
+    plt.pie(instances, labels=names, autopct=lambda pct: showPercentagePiePlot(pct, instances),
+            textprops={'fontsize': 12})
     # plt.title('Class distribution for validation dataset')
+    plt.xticks(size=20)
+    plt.yticks(size=20)
     plt.savefig(os.path.join(saveDir, 'classDistributionPiePlot.png'), bbox_inches='tight')
 
     return names, instances
@@ -72,8 +75,11 @@ def getPiePlotClassDistributionAndSaveDataset(logDir, saveDir, datasetName):
 
     plt.clf()
     plt.figure(figsize=(15, 9))
-    plt.pie(instances, labels=names, autopct=lambda pct: showPercentagePiePlot(pct, instances))
+    plt.pie(instances, labels=names, autopct=lambda pct: showPercentagePiePlot(pct, instances),
+            textprops={'fontsize': 12})
     # plt.title('Class distribution for validation dataset')
+    plt.xticks(size=20)
+    plt.yticks(size=20)
     plt.savefig(os.path.join(saveDir, 'classDistributionPiePlot.png'), bbox_inches='tight')
 
     return names, instances
@@ -97,64 +103,19 @@ def getBarPlotApPerCategoryAndSaveTrain(apMetrics, classNames, nClassInstances, 
 
     idxOrder = np.argsort(apPerClass)
 
-    rects1 = ax.bar(x - width / 2, apPerClass[idxOrder], width, label='AP')
+    rects1 = ax.bar(x - width / 2, apPerClass[idxOrder], width, label='AP', color='#FF7276', edgecolor='#540B0C')
     rects2 = ax.bar(x + width / 2, np.round(nClassInstances[idxOrder] / np.sum(nClassInstances) * 100, 2), width,
-                    label='Percentage of total instances')
-    ax.bar_label(rects1, padding=4)
-    ax.bar_label(rects2, padding=4)
+                    label='Percentage of total instances', color='#ADD8E6', edgecolor='b')
+    ax.bar_label(rects1, padding=4, size=12)
+    ax.bar_label(rects2, padding=4, size=12)
 
     # ax.set_title('Scores per class')
     ax.set_xticks(x, np.array(classNames)[idxOrder])
     ax.set_ylabel('')
-    ax.legend(loc='upper left')
+    ax.legend(loc='upper left', prop={'size': 20})
+    plt.xticks(size=20)
+    plt.yticks(size=20)
     fig.savefig(os.path.join(saveDir, 'apAndDistributionPerClassBarPlot.png'), bbox_inches='tight')
-
-def getHorizontalBarPlotDiffApMetricsTrain(apMetrics, classNames, saveDir):
-    plt.clf()
-    plt.figure(figsize=(15, 9))
-    aps = []
-    apsLabels = []
-    for apLabel in apMetrics.keys():
-        metric2save = True
-        for className in classNames:
-            if className in apLabel or apLabel in 'iteration':
-                metric2save = False
-        if metric2save:
-            apsLabels.append(apLabel)
-            aps.append(apMetrics[apLabel])
-    aps = np.around(aps, 2)
-
-    plt.barh(apsLabels, aps)
-    # plt.title('AP general metrics')
-    plt.savefig(os.path.join(saveDir, 'apsHrzBarPlot.png'), bbox_inches='tight')
-
-def getHorizontalBarPlotDiffApMetricsDataset(datasetEvaluationDir, datasetPlotDir):
-    aps = []
-    names = []
-    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
-        gettingValues = False
-        for line in f.readlines():
-            if gettingValues:
-                if 'evaluation' in line:
-                    break
-                line = line.replace('|', '')
-                line = line.replace(':', '')
-                line = line.replace('-', '')
-                line = line.replace('\n', '')
-                for elem in line.split(' '):
-                    if len(elem) > 0:
-                        if elem.replace('.', '').isdigit():
-                            aps.append(float(elem))
-                        else:
-                            names.append(elem)
-            if 'Evaluation results for bbox' in line:
-                gettingValues = True
-
-    aps = np.around(aps, 2)
-    plt.clf()
-    plt.barh(names, aps)
-    # plt.title('AP general metrics')
-    plt.savefig(os.path.join(datasetPlotDir, 'apsHrzBarPlot.png'), bbox_inches='tight')
 
 def getBarPlotApPerCategoryAndSaveDataset(datasetEvaluationDir, datasetPlotDir):
     aps = []
@@ -165,7 +126,7 @@ def getBarPlotApPerCategoryAndSaveDataset(datasetEvaluationDir, datasetPlotDir):
         for line in f.readlines():
             if analyzing:
                 if gettingValues:
-                    if 'evaluation' in line:
+                    if 'Loading' in line:
                         break
                     line = line.replace('|', '')
                     line = line.replace(':', '')
@@ -199,17 +160,143 @@ def getBarPlotApPerCategoryAndSaveDataset(datasetEvaluationDir, datasetPlotDir):
 
     idxOrder = np.argsort(apPerClass)
 
-    rects1 = ax.bar(x - width / 2, apPerClass[idxOrder], width, label='AP')
+    rects1 = ax.bar(x - width / 2, apPerClass[idxOrder], width, label='AP', color='#FF7276', edgecolor='#540B0C')
     rects2 = ax.bar(x + width / 2, np.round(nClassInstances[idxOrder] / np.sum(nClassInstances) * 100, 2), width,
-                    label='Percentage of total instances')
-    ax.bar_label(rects1, padding=4)
-    ax.bar_label(rects2, padding=4)
+                    label='Percentage of total instances', color='#ADD8E6', edgecolor='b')
+    ax.bar_label(rects1, padding=4, size=12)
+    ax.bar_label(rects2, padding=4, size=12)
 
     # ax.set_title('Scores per class')
     ax.set_xticks(x, np.array(names)[idxOrder])
     ax.set_ylabel('')
-    ax.legend(loc='upper left')
+    plt.xticks(size=20)
+    plt.yticks(size=20)
+    ax.legend(loc='upper left', prop={'size': 20})
     fig.savefig(os.path.join(datasetPlotDir, 'apAndDistributionPerClassBarPlot.png'), bbox_inches='tight')
+
+def getHorizontalBarPlotDiffApMetricsTrain(apMetrics, classNames, saveDir):
+    plt.clf()
+    plt.figure(figsize=(15, 9))
+    aps = []
+    apsLabels = []
+    for apLabel in apMetrics.keys():
+        metric2save = True
+        for className in classNames:
+            if className in apLabel or apLabel in 'iteration':
+                metric2save = False
+        if metric2save:
+            apsLabels.append(apLabel)
+            aps.append(apMetrics[apLabel])
+    aps = np.around(aps, 2)
+
+    plt.barh(apsLabels, aps, color='#ADD8E6', edgecolor='b')
+    # plt.title('AP general metrics')
+    plt.xticks(size=20)
+    plt.yticks(size=20)
+    plt.xlim(0, 100)
+    plt.xlabel('%', size=20)
+    plt.savefig(os.path.join(saveDir, 'apsHrzBarPlot.png'), bbox_inches='tight')
+
+def getHorizontalBarPlotDiffApMetricsDataset(datasetEvaluationDir, datasetPlotDir):
+    aps = []
+    names = []
+    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
+        gettingValues = False
+        for line in f.readlines():
+            if gettingValues:
+                if 'evaluation' in line:
+                    break
+                line = line.replace('|', '')
+                line = line.replace(':', '')
+                line = line.replace('-', '')
+                line = line.replace('\n', '')
+                for elem in line.split(' '):
+                    if len(elem) > 0:
+                        if elem.replace('.', '').isdigit():
+                            aps.append(float(elem))
+                        else:
+                            names.append(elem)
+            if 'Evaluation results for bbox' in line:
+                gettingValues = True
+
+    aps = np.around(aps, 2)
+    plt.clf()
+    plt.barh(names, aps, color='#ADD8E6', edgecolor='b')
+    # plt.title('AP general metrics')
+    plt.xticks(size=20)
+    plt.yticks(size=20)
+    plt.xlim(0, 100)
+    plt.xlabel('%', size=20)
+    plt.savefig(os.path.join(datasetPlotDir, 'apsHrzBarPlot.png'), bbox_inches='tight')
+
+def getInferenceSpeedPlot(datasetEvaluationDir, datasetPlotDir):
+    fps = []
+    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
+        gettingValues = False
+        for line in f.readlines():
+            if gettingValues:
+                if 'Total inference time:' in line:
+                    break
+                if len(line) > 0:
+                    fps.append(np.round(2/float(line.split(' ')[11]), 2))
+            if 'Start inference on' in line:
+                gettingValues = True
+
+    plt.clf()
+    plt.figure(figsize=(15, 9))
+    # plt.title('Inference speed')
+    plt.plot(fps, label='CPU %')
+    plt.xlabel('Inference step', size=20)
+    plt.ylabel('FPS', size=20)
+    plt.xlim(0, len(fps)-1)
+    plt.ylim(np.min(fps)-4*np.std(fps), np.max(fps)+4*np.std(fps))
+    plt.savefig(os.path.join(datasetPlotDir, 'inferenceSpeedPlot.png'), bbox_inches='tight')
+
+def getConsumptionPlot(datasetPlotDir):
+    with open(os.path.join(datasetEvaluationDir, 'consumptionLog.txt'), 'r') as f:
+        consumptions = [triplet[:-1] for triplet in f.readlines()[1:]]
+
+    cpuUsage = []
+    ramUsage = []
+    gpuUsage = []
+    for triplet in consumptions:
+        values = triplet.split(' ')
+        cpuUsage.append(float(values[0]))
+        ramUsage.append(float(values[1]))
+        gpuUsage.append(float(values[2]))
+
+    xValues = np.arange(0, len(cpuUsage)/2, 0.5)  # It depends on threading.Timer in evaluate_lazy_config.py
+
+    plt.clf()
+    plt.figure(figsize=(15, 9))
+    plt.plot(xValues, cpuUsage, label='CPU %')
+    plt.plot(xValues, ramUsage, label='RAM %')
+    plt.plot(xValues, gpuUsage, label='GPU %')
+    # plt.title('Consumption percentages')
+    plt.xticks(size=20)
+    plt.yticks(size=20)
+    plt.xlim(0, len(cpuUsage)//2)
+    plt.ylim(0, 100)
+    plt.xlabel('Time (s)', size=20)
+    plt.ylabel('Usage (%)', size=20)
+    plt.legend(loc="lower center", prop={'size': 20})
+    plt.savefig(os.path.join(datasetPlotDir, 'consumptionPlot.png'), bbox_inches='tight')
+
+def getApAndArMetrics(datasetEvaluationDir):
+    apAndArTxt = ''
+    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
+        gettingValues = False
+        for line in f.readlines():
+            if gettingValues:
+                if 'd2.evaluation.testing' in line:
+                    break
+                if len(line) > 0:
+                    apAndArTxt = f'{apAndArTxt}{line}'
+            if 'index created!' in line:
+                gettingValues = True
+
+    with open(os.path.join(datasetEvaluationDir, 'apAndAr.txt'), 'w') as f:
+        f.write(apAndArTxt)
 
 
 if __name__ == "__main__":
@@ -242,8 +329,10 @@ if __name__ == "__main__":
         plt.figure(figsize=(15, 9))
         plt.plot(iterations, totalLoss)
         # plt.title('Training total_loss')
-        plt.xlabel('Iteration')
-        plt.ylabel('Total loss')
+        plt.xlabel('Iteration', size=20)
+        plt.ylabel('Total loss', size=20)
+        plt.xticks(size=20)
+        plt.yticks(size=20)
         plt.savefig(os.path.join(trainPlotDir, 'totalLossPerIter.png'), bbox_inches='tight')
 
         # Some graphs for the FCOS models
@@ -251,24 +340,30 @@ if __name__ == "__main__":
         plt.figure(figsize=(15, 9))
         plt.plot(iterations, loss_fcos_cls)
         # plt.title('Training loss_fcos_cls')
-        plt.xlabel('Iteration')
-        plt.ylabel('loss_fcos_cls')
+        plt.xlabel('Iteration', size=20)
+        plt.ylabel('loss_fcos_cls', size=20)
+        plt.xticks(size=20)
+        plt.yticks(size=20)
         plt.savefig(os.path.join(trainPlotDir, 'lossFcosClsPerIter.png'), bbox_inches='tight')
 
         loss_fcos_ctr = [iterData['loss_fcos_ctr'] for iterData in metrics[:-1]]
         plt.figure(figsize=(15, 9))
         plt.plot(iterations, loss_fcos_ctr)
         # plt.title('Training loss_fcos_ctr')
-        plt.xlabel('Iteration')
-        plt.ylabel('loss_fcos_ctr')
+        plt.xlabel('Iteration', size=20)
+        plt.ylabel('loss_fcos_ctr', size=20)
+        plt.xticks(size=20)
+        plt.yticks(size=20)
         plt.savefig(os.path.join(trainPlotDir, 'lossFcosCtrPerIter.png'), bbox_inches='tight')
 
         loss_fcos_loc = [iterData['loss_fcos_loc'] for iterData in metrics[:-1]]
         plt.figure(figsize=(15, 9))
         plt.plot(iterations, loss_fcos_loc)
         # plt.title('Training loss_fcos_loc')
-        plt.xlabel('Iteration')
-        plt.ylabel('loss_fcos_loc')
+        plt.xlabel('Iteration', size=20)
+        plt.ylabel('loss_fcos_loc', size=20)
+        plt.xticks(size=20)
+        plt.yticks(size=20)
         plt.savefig(os.path.join(trainPlotDir, 'lossFcosLocPerIter.png'), bbox_inches='tight')
 
     # Pie plot for class distribution (the count for some classes is incorrect, just by 1)
@@ -290,4 +385,13 @@ if __name__ == "__main__":
 
     # Horizontal bar plot for different AP metrics
     getHorizontalBarPlotDiffApMetricsDataset(datasetEvaluationDir, datasetPlotDir)
+
+    # CPU RAM GPU Consumption plots
+    getConsumptionPlot(datasetPlotDir)
+
+    # Inference speed plot
+    getInferenceSpeedPlot(datasetEvaluationDir, datasetPlotDir)
+
+    # AP and AR metrics ------------------------------------------------------------------------------------------------
+    getApAndArMetrics(datasetEvaluationDir)
 

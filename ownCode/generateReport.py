@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import argparse, os, random, sys
+import argparse, json, os, random, sys
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
@@ -60,7 +60,7 @@ def drawFigureTitle(hrzFigCenter: int, height: int, string: str):
     figureIdx += 1
     report.setFont(font, fontSize)
 
-def drawImage(imagePath : str, x: int, title: str, width: int = 72*mm, height: int = 72*mm):
+def drawImage(imagePath: str, x: int, title: str, width: int = 72*mm, height: int = 72*mm):
     global lineHeight
     image = ImageReader(imagePath)
     report.drawImage(image, x, lineHeight, width=width, height=height, preserveAspectRatio=True)
@@ -68,7 +68,7 @@ def drawImage(imagePath : str, x: int, title: str, width: int = 72*mm, height: i
 
 def draw2PlotsPerLine(plotSpecificFolder: str, generalTitle: str, plotFilenames: list, figureTitles: list):
     global lineHeight, figureIdx
-    drawBoldString(20 * mm, generalTitle, 16, 5)
+    drawBoldString(20 * mm, generalTitle, 16)
 
     plotsDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'plots', plotSpecificFolder))
 
@@ -105,6 +105,7 @@ if __name__ == "__main__":
     modelName = args.model_name
     datasetDir = args.dataset_dir
     datasetName = datasetDir.replace('\\', '/').split('/')[-1]
+    datasetEvaluationDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'evaluation', datasetName))
     extraIntro = args.extra_intro_dir
 
     # PDF general settings ---------------------------------------------------------------------------------------------
@@ -128,9 +129,9 @@ if __name__ == "__main__":
     drawBoldCentredString(100 * mm, f'Report', 20)
     drawBoldCentredString(100 * mm, f'Model: {modelName}', 16, 2)
     drawBoldCentredString(100 * mm, f'Dataset: {datasetName}', 16, 2)
-    nextPage()
 
     # Introduction -----------------------------------------------------------------------------------------------------
+    nextPage()
     lineHeight = topMargin
     drawBoldString(20 * mm, 'Introduction', 16)
 
@@ -145,6 +146,7 @@ if __name__ == "__main__":
     writeParagraph(extraIntro)
 
     # Train Plots ------------------------------------------------------------------------------------------------------
+    nextPage()
     trainPlotFilenames = ['classDistributionPiePlot.png', 'apAndDistributionPerClassBarPlot.png', 'apsHrzBarPlot.png',
                           'totalLossPerIter.png']
     trainFigureTitles = ['Class distribution for validation dataset', 'AP and percentage distribution per class',
@@ -152,21 +154,42 @@ if __name__ == "__main__":
     draw2PlotsPerLine('train', 'Train plots', trainPlotFilenames, trainFigureTitles)
 
     # Dataset Plots ----------------------------------------------------------------------------------------------------
-    datasetPlotFilenames = ['classDistributionPiePlot.png', 'apAndDistributionPerClassBarPlot.png', 'apsHrzBarPlot.png']
+    nextPage()
+    datasetPlotFilenames = ['classDistributionPiePlot.png', 'apAndDistributionPerClassBarPlot.png', 'apsHrzBarPlot.png',
+                            'consumptionPlot.png', 'inferenceSpeedPlot.png']
     datasetFigureTitles = [f'Class distribution for {datasetName} dataset', 'AP and percentage distribution per class',
-                           'General AP metrics']
+                           'General AP metrics', 'Consumption percentages', 'Inference speed']
     draw2PlotsPerLine(datasetName, f'Dataset plots [{datasetName}]', datasetPlotFilenames, datasetFigureTitles)
 
+    # More dataset metrics ---------------------------------------------------------------------------------------------
+    nextPage()
+    drawBoldString(20 * mm, f'More dataset [{datasetName}] metrics', 16)
+    with open(os.path.join(datasetEvaluationDir, 'apAndAr.txt'), 'r') as f:
+        for line in f.readlines():
+            writeParagraph(line)
+
+    # Evaluating harwdare specs ----------------------------------------------------------------------------------------
+    nextPage()
+    drawBoldString(20 * mm, 'Evaluating hardware specs', 16)
+    with open(os.path.join(datasetEvaluationDir, 'hardwareSpecs.json'), 'r') as f:
+        specs = json.load(f)
+    for key in specs.keys():
+        drawBoldString(20 * mm, key.upper(), 14, 3)
+        for spec in specs[key].values():
+            if isinstance(spec, list):
+                writeParagraph('\n'.join(spec))
+            else:
+                writeParagraph(spec)
+
     # Classified images ------------------------------------------------------------------------------------------------
-    predictedImagesDir = os.path.abspath(os.path.join(os.pardir, 'models', modelName, 'evaluation', datasetName,
-                                                      'images'))
+    nextPage()
+    predictedImagesDir = os.path.join(datasetEvaluationDir, 'images')
 
     mainImages = []
     for file in os.listdir(predictedImagesDir):
         if os.path.isfile(os.path.join(predictedImagesDir, file)):
             mainImages.append(os.path.join(predictedImagesDir, file))
 
-    nextPage()
     drawBoldString(20 * mm, 'Images', 16)
 
     # Images with predictions of every class -----

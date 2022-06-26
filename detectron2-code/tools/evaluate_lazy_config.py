@@ -48,6 +48,7 @@ def do_test(cfg, model):
     ret = inference_on_dataset(
         model, instantiate(cfg.dataloader.test), instantiate(cfg.dataloader.evaluator)
     )
+
     print_csv_format(ret)
     return ret
 

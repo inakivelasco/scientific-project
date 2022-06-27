@@ -202,6 +202,7 @@ def inference_on_dataset(
         )
     )
 
+    # This adds some more metrics to the log: AP and AR
     if len(logging.getLoggerClass().root.handlers) > 0:
         loggerFilename = logging.getLoggerClass().root.handlers[0].baseFilename.replace('\\', '/').split('/')[:-1]
         loggerFilename.append('log.txt')

@@ -1,14 +1,42 @@
 #!/usr/bin/env python
+
+"""
+Script that will generate the corresponding plots for a model and an already evaluated dataset.
+
+Args:
+    --model-name (str): name of the already trained and evaluated model
+    --dataset-name (str): name of the dataset that will be used for the plots
+
+Returns:
+    Train and test plots will be saved inside the model folder, in the evaluation folder
+"""
+
 import argparse, json, os
 import numpy as np
 import matplotlib.pyplot as plt
 
 def showPercentagePiePlot(pct, allvalues):
+    """
+        Utility function to show percentage and total in pie plot
+    """
     #  Function to show percentage and absolute value in the pie plot
     absolute = int(pct / 100. * np.sum(allvalues))
     return "{:.1f}%\n({:d})".format(pct, absolute)
 
-def getPiePlotClassDistributionAndSaveTrain(logDir, saveDir):
+def getPiePlotClassDistributionAndSaveTrain(logDir: str, saveDir: str):
+    """
+        Generates a pie plot showing the total number of instances for each class and their corresponding percentages of
+        the total instances (train step).
+
+        Args:
+            logDir: log.txt file path
+            saveDir: path where the plot will be saved
+
+        Returns:
+            names: list containing all class names
+            instances: list containing total number of instances of each class
+            Plot will be saved at saveDir
+    """
     names = []
     instances = []
     with open(os.path.join(logDir, 'log.txt'), 'r') as f:
@@ -46,7 +74,21 @@ def getPiePlotClassDistributionAndSaveTrain(logDir, saveDir):
 
     return names, instances
 
-def getPiePlotClassDistributionAndSaveDataset(logDir, saveDir, datasetName):
+def getPiePlotClassDistributionAndSaveDataset(logDir: str, saveDir: str, datasetName: str):
+    """
+        Generates a pie plot showing the total number of instances for each class and their corresponding percentages of
+        the total instances (test step).
+
+        Args:
+            logDir: log.txt directory path
+            saveDir: path where the plot will be saved
+            datasetName: name of the dataset that will be plotted
+
+        Returns:
+            names: list containing all class names
+            instances: list containing total number of instances of each class
+            Plot will be saved at saveDir
+    """
     names = []
     instances = []
     with open(os.path.join(logDir, 'log.txt'), 'r') as f:
@@ -84,7 +126,19 @@ def getPiePlotClassDistributionAndSaveDataset(logDir, saveDir, datasetName):
 
     return names, instances
 
-def getBarPlotApPerCategoryAndSaveTrain(apMetrics, classNames, nClassInstances, saveDir):
+def getBarPlotApPerCategoryAndSaveTrain(apMetrics: dict, classNames: list, nClassInstances: list, saveDir: str):
+    """
+        Generates a bar plot showing AP and percentage distribution per class (train step).
+
+        Args:
+            apMetrics: different general and class specific AP metrics
+            classNames: class names
+            nClassInstances: total number of class instances
+            saveDir: path where the plot will be saved
+
+        Returns:
+            Plot will be saved at saveDir
+    """
     x = np.arange(len(classNames))  # label locations
     width = 0.35  # bars width
 
@@ -117,10 +171,20 @@ def getBarPlotApPerCategoryAndSaveTrain(apMetrics, classNames, nClassInstances, 
     plt.yticks(size=20)
     fig.savefig(os.path.join(saveDir, 'apAndDistributionPerClassBarPlot.png'), bbox_inches='tight')
 
-def getBarPlotApPerCategoryAndSaveDataset(datasetEvaluationDir, datasetPlotDir):
+def getBarPlotApPerCategoryAndSaveDataset(logDir: str, saveDir: str):
+    """
+        Generates a bar plot showing AP and percentage distribution per class (test step).
+
+        Args:
+            logDir: log.txt directory path
+            saveDir: path where the plot will be saved
+
+        Returns:
+            Plot will be saved at saveDir
+    """
     aps = []
     names = []
-    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
+    with open(os.path.join(logDir, 'log.txt'), 'r') as f:
         analyzing = False
         gettingValues = False
         for line in f.readlines():
@@ -172,9 +236,20 @@ def getBarPlotApPerCategoryAndSaveDataset(datasetEvaluationDir, datasetPlotDir):
     plt.xticks(size=20)
     plt.yticks(size=20)
     ax.legend(loc='upper left', prop={'size': 20})
-    fig.savefig(os.path.join(datasetPlotDir, 'apAndDistributionPerClassBarPlot.png'), bbox_inches='tight')
+    fig.savefig(os.path.join(saveDir, 'apAndDistributionPerClassBarPlot.png'), bbox_inches='tight')
 
-def getHorizontalBarPlotDiffApMetricsTrain(apMetrics, classNames, saveDir):
+def getHorizontalBarPlotDiffApMetricsTrain(apMetrics: dict, classNames: list, saveDir: list):
+    """
+        Generates a horizontal bar plot showing general AP metrics (train step).
+
+        Args:
+            apMetrics: different general and class specific AP metrics
+            classNames: class names
+            saveDir: path where the plot will be saved
+
+        Returns:
+            Plot will be saved at saveDir
+    """
     plt.clf()
     plt.figure(figsize=(15, 9))
     aps = []
@@ -197,10 +272,20 @@ def getHorizontalBarPlotDiffApMetricsTrain(apMetrics, classNames, saveDir):
     plt.xlabel('%', size=20)
     plt.savefig(os.path.join(saveDir, 'apsHrzBarPlot.png'), bbox_inches='tight')
 
-def getHorizontalBarPlotDiffApMetricsDataset(datasetEvaluationDir, datasetPlotDir):
+def getHorizontalBarPlotDiffApMetricsDataset(logDir: str, saveDir: str):
+    """
+        Generates a horizontal bar plot showing general AP metrics (test step).
+
+        Args:
+            logDir: log.txt directory path
+            saveDir: path where the plot will be saved
+
+        Returns:
+            Plot will be saved at saveDir
+    """
     aps = []
     names = []
-    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
+    with open(os.path.join(logDir, 'log.txt'), 'r') as f:
         gettingValues = False
         for line in f.readlines():
             if gettingValues:
@@ -227,11 +312,21 @@ def getHorizontalBarPlotDiffApMetricsDataset(datasetEvaluationDir, datasetPlotDi
     plt.yticks(size=20)
     plt.xlim(0, 100)
     plt.xlabel('%', size=20)
-    plt.savefig(os.path.join(datasetPlotDir, 'apsHrzBarPlot.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(saveDir, 'apsHrzBarPlot.png'), bbox_inches='tight')
 
-def getInferenceSpeedPlot(datasetEvaluationDir, datasetPlotDir):
+def getInferenceSpeedPlot(logDir: str, saveDir: str):
+    """
+        Generates a plot showing inference speed for evaluation.
+
+        Args:
+            logDir: log.txt directory path
+            saveDir: path where the plot will be saved
+
+        Returns:
+            Plot will be saved at saveDir
+    """
     fps = []
-    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
+    with open(os.path.join(logDir, 'log.txt'), 'r') as f:
         gettingValues = False
         for line in f.readlines():
             if gettingValues:
@@ -250,10 +345,20 @@ def getInferenceSpeedPlot(datasetEvaluationDir, datasetPlotDir):
     plt.ylabel('FPS', size=20)
     plt.xlim(0, len(fps)-1)
     plt.ylim(np.min(fps)-4*np.std(fps), np.max(fps)+4*np.std(fps))
-    plt.savefig(os.path.join(datasetPlotDir, 'inferenceSpeedPlot.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(saveDir, 'inferenceSpeedPlot.png'), bbox_inches='tight')
 
-def getConsumptionPlot(datasetPlotDir):
-    with open(os.path.join(datasetEvaluationDir, 'consumptionLog.txt'), 'r') as f:
+def getConsumptionPlot(logDir: str, saveDir: str):
+    """
+        Generates a plot showing CPU, RAM and GPU consumptions during evaluation.
+
+        Args:
+            logDir: log.txt directory path
+            saveDir: path where the plot will be saved
+
+        Returns:
+            Plot will be saved at saveDir
+    """
+    with open(os.path.join(logDir, 'consumptionLog.txt'), 'r') as f:
         consumptions = [triplet[:-1] for triplet in f.readlines()[1:]]
 
     cpuUsage = []
@@ -280,11 +385,20 @@ def getConsumptionPlot(datasetPlotDir):
     plt.xlabel('Time (s)', size=20)
     plt.ylabel('Usage (%)', size=20)
     plt.legend(loc="lower center", prop={'size': 20})
-    plt.savefig(os.path.join(datasetPlotDir, 'consumptionPlot.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(saveDir, 'consumptionPlot.png'), bbox_inches='tight')
 
-def getApAndArMetrics(datasetEvaluationDir):
+def getApAndArMetrics(logDir: str):
+    """
+        Generates a .txt file with different AP and AR metrics.
+
+        Args:
+            logDir: log.txt directory path
+
+        Returns:
+            Txt file will be saved at logDir
+    """
     apAndArTxt = ''
-    with open(os.path.join(datasetEvaluationDir, 'log.txt'), 'r') as f:
+    with open(os.path.join(logDir, 'log.txt'), 'r') as f:
         gettingValues = False
         for line in f.readlines():
             if gettingValues:
@@ -295,12 +409,12 @@ def getApAndArMetrics(datasetEvaluationDir):
             if 'index created!' in line:
                 gettingValues = True
 
-    with open(os.path.join(datasetEvaluationDir, 'apAndAr.txt'), 'w') as f:
+    with open(os.path.join(logDir, 'apAndAr.txt'), 'w') as f:
         f.write(apAndArTxt)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Generate report script')
+    parser = argparse.ArgumentParser(description='Generate plots script')
     parser.add_argument("--model-name", help="Model name (type str)", type=str, required=True)
     parser.add_argument("--dataset-name", help="Dataset name (type str)", type=str, required=True)
     args = parser.parse_args()
@@ -387,11 +501,10 @@ if __name__ == "__main__":
     getHorizontalBarPlotDiffApMetricsDataset(datasetEvaluationDir, datasetPlotDir)
 
     # CPU RAM GPU Consumption plots
-    getConsumptionPlot(datasetPlotDir)
+    getConsumptionPlot(datasetEvaluationDir, datasetPlotDir)
 
     # Inference speed plot
     getInferenceSpeedPlot(datasetEvaluationDir, datasetPlotDir)
 
     # AP and AR metrics ------------------------------------------------------------------------------------------------
     getApAndArMetrics(datasetEvaluationDir)
-

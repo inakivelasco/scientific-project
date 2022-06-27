@@ -5,10 +5,10 @@ from detectron2.data.catalog import DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
 
 if __name__ == "__main__":
-    imagesDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/test/images'
+    imagesDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/images'
     ogAnnsDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/camera_main_camera_annotations/bounding_box'
 
-    datasetName = 'test'
+    datasetName = 'train'
     newAnnsDir = f'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/{datasetName}'
 
     newAnns = {}
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     newAnns['images'] = []
     newAnns['annotations'] = []
     annsId = 0
-
+    cat_id = 0
     for imageFile in os.listdir(imagesDir):
         imageId = imageFile.split('.')[0]
 
@@ -47,18 +47,24 @@ if __name__ == "__main__":
             for line in f.readlines():
                 newBbox = [float(i) for i in line[:-1].split(' ')[1:]]
                 newBbox[0] *= width
-                newBbox[2] *= width
                 newBbox[1] *= height
+                newBbox[2] *= width
                 newBbox[3] *= height
-                newBbox[0] = newBbox[0] - newBbox[2]/2
-                newBbox[1] = newBbox[1] - newBbox[3]/2
+                newBbox[0] = newBbox[0] - newBbox[2] / 2
+                newBbox[1] = newBbox[1] - newBbox[3] / 2
                 newBbox = [round(i, 2) for i in newBbox]
+                if int(float(line.split(' ')[0])) == 1:
+                    cat_id = 2
+                elif int(float(line.split(' ')[0])) == 2:
+                    cat_id = 1
+                else:
+                    cat_id = 3
                 newAnns['annotations'].append({'segmentation': [],
                                                'area': newBbox[2] * newBbox[3],  # Not sure about this
                                                'iscrowd': 0,
                                                'image_id': imageId,
                                                'bbox': newBbox,
-                                               'category_id': int(float(line.split(' ')[0])),
+                                               'category_id': cat_id,
                                                'id': annsId})
                 annsId += 1
 

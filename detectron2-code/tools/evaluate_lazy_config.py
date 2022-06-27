@@ -80,6 +80,7 @@ cfg.dataloader.test.num_workers = 0  # for debugging
 default_setup(cfg, args)
 register_dataset()
 
+# Logger for CPU, RAM and GPU consumptions
 logging.basicConfig(filename=os.path.join(os.pardir, os.pardir, 'models', model_name, 'evaluation', 'test',
                                           'consumptionLog.txt'),
                     filemode='w',
@@ -88,6 +89,8 @@ logging.basicConfig(filename=os.path.join(os.pardir, os.pardir, 'models', model_
                     level=logging.INFO)
 loggerConsumption = logging.getLogger('consumption')
 logging.getLogger('consumption').info(f'CPU RAM GPU')
+
+# Different thread to read consumptions
 stop_thread = False
 thread = threading.Thread(target=measure)
 thread.start()
@@ -101,15 +104,22 @@ DetectionCheckpointer(model).load(cfg.train.init_checkpoint)
 
 do_test(cfg, model)
 
+# Different images with their predictions will be saved to be shown later in the report
+# There will be a general images folder called 'images' with a folder for each class inside
 imagesDir = os.path.join(cfg.train.output_dir, 'images')
 os.makedirs(imagesDir, exist_ok=True)
 
 eval_loader = instantiate(cfg.dataloader.test)
 model.eval()
 
-class_labels = np.array(['Weeds', 'Maize', 'Bark'])  # HARDCODED
+class_labels = []
+with open(MetadataCatalog.get("maize_train").json_file, 'r') as f:
+    for category in json.load(f)['categories']:
+        class_labels.append(category['name'])
+
 for class_label in class_labels:
     os.makedirs(os.path.join(imagesDir, class_label), exist_ok=True)
+
 nImages2Save = 20
 for idx, inputs in enumerate(eval_loader):
     if idx == nImages2Save:

@@ -5,11 +5,11 @@ from detectron2.data.catalog import DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
 
 if __name__ == "__main__":
-    imagesDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/images'
-    ogAnnsDir = 'C:/Users/Inaki/Desktop/corn_dataset_v2/camera_main_camera_annotations/bounding_box'
+    imagesDir = '/media/naeem/T7/datasets/Corn_syn_dataset/corn_dataset_v2/camera_main_camera/rect'
+    ogAnnsDir = '/media/naeem/T7/datasets/Corn_syn_dataset/corn_dataset_v2/camera_main_camera_annotations/bounding_box'
 
-    datasetName = 'train'
-    newAnnsDir = f'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/{datasetName}'
+    datasetName = 'syn_coco_box'
+    newAnnsDir = f'/media/naeem/T7/datasets/Corn_syn_dataset/corn_dataset_v2/{datasetName}'
 
     newAnns = {}
 
@@ -22,16 +22,16 @@ if __name__ == "__main__":
 
     newAnns['licenses'] = [{'url': 'None', 'id': 1, 'name': 'None'}]
 
-    newAnns['categories'] = [{'supercategory': 'agriculture', 'id': 1, 'name': 'Weeds'},
-                             {'supercategory': 'agriculture', 'id': 2, 'name': 'Maize'},
-                             {'supercategory': 'agriculture', 'id': 3, 'name': 'Bark'}]
+    newAnns['categories'] = [{'supercategory': 'plants', 'id': 1, 'name': 'Weeds'},
+                             {'supercategory': 'plants', 'id': 2, 'name': 'Maize'},
+                             {'supercategory': 'residue', 'id': 3, 'name': 'Bark'}]
 
     newAnns['images'] = []
     newAnns['annotations'] = []
     annsId = 0
     cat_id = 0
     for imageFile in os.listdir(imagesDir):
-        imageId = imageFile.split('.')[0]
+        imageId = int(imageFile.split('.')[0])
 
         width, height = PIL.Image.open(os.path.join(imagesDir, imageFile)).size
         newAnns['images'].append({'license': 1,
@@ -43,7 +43,7 @@ if __name__ == "__main__":
                                   'flickr_url': 'None',
                                   'id': imageId})
 
-        with open(os.path.join(ogAnnsDir, f'{imageId}.txt'), 'r') as f:
+        with open(os.path.join(ogAnnsDir, '{:04}.txt'.format(imageId)), 'r') as f:
             for line in f.readlines():
                 newBbox = [float(i) for i in line[:-1].split(' ')[1:]]
                 newBbox[0] *= width
@@ -67,7 +67,7 @@ if __name__ == "__main__":
                                                'category_id': cat_id,
                                                'id': annsId})
                 annsId += 1
-
+    os.makedirs(newAnnsDir, exist_ok=True)
     with open(os.path.join(newAnnsDir, f'{datasetName}NewAnnotations.json'), 'w+') as f:
         json.dump(newAnns, f)
 

@@ -205,28 +205,21 @@ if __name__ == "__main__":
         nargs=argparse.REMAINDER,
     )
     args = parser.parse_args()
-    args.output = os.path.join(args.output, args.config_file.split('/')[-2])  # Added by Inaki
+    args.output = os.path.join(args.output, args.config_file.split('/')[-2])  # Added by me
     logger = setup_logger()
     logger.info("Command line arguments: " + str(args))
     PathManager.mkdirs(args.output)
     # Disable respecialization on new shapes. Otherwise --run-eval will be slow
     torch._C._jit_set_bailout_depth(1)
     from detectron2.data.datasets import register_coco_instances
-    # register_coco_instances("maize_valid", {},
-    #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_val.json",
-    #                         "/media/naeem/T7/datasets/maize_data_coco")
-    # register_coco_instances("maize_valid", {},
-    #                         "/../../../../Scientific-Project/dataset/annotations/instancesAnimal_val2017.json",
-    #                         "/../../../../Scientific-Project/dataset/images/val2017")
     register_coco_instances("maize_valid", {},
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/valNewAnnotations.json',
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/images')
+                            '/corn_dataset_v2/COCOFormat/val/valNewAnnotations.json',
+                            '/corn_dataset_v2/COCOFormat/val/images')
 
     # cfg = setup_cfg(args)
 
     # create a torch model
     cfg = LazyConfig.load(args.config_file)
-    # cfg.train.output_dir = "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
     cfg.dataloader.test.num_workers = 0  # for debugging
     # cfg = LazyConfig.apply_overrides(cfg, args.opts)
     default_setup(cfg, args)

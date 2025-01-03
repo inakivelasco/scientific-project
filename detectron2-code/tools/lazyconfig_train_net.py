@@ -106,24 +106,17 @@ def do_train(args, cfg):
 def register_dataset():
     from detectron2.data.datasets import register_coco_instances
 
-    # register_coco_instances("maize_train", {},
-    #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_train.json",
-    #                         "/media/naeem/T7/datasets/maize_data_coco")
     register_coco_instances("maize_train", {},
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/trainNewAnnotations.json',
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/images')
-    # register_coco_instances("maize_valid", {},
-    #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_val.json",
-    #                         "/media/naeem/T7/datasets/maize_data_coco")
+                            '/corn_dataset_v2/COCOFormat/train/trainNewAnnotations.json',
+                            '/corn_dataset_v2/COCOFormat/train/images')
     register_coco_instances("maize_valid", {},
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/valNewAnnotations.json',
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/val/images')
+                            '/corn_dataset_v2/COCOFormat/val/valNewAnnotations.json',
+                            '/corn_dataset_v2/COCOFormat/val/images')
 
 
 def main(args):
     cfg = LazyConfig.load(args.config_file)
 
-    # cfg.train.output_dir = "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
     cfg.train.output_dir = os.path.join(os.pardir, os.pardir, 'models', 'fcos_R_50_FPN_1x_v00')
     while os.path.isdir(cfg.train.output_dir):
         # This while changes the cfg.train.output_dir version number to the next one. It is just valid following the

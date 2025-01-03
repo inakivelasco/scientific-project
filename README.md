@@ -55,12 +55,12 @@ Previous changes:
 - Adjust args parameters
 
 `evaluate_lazy_config.py --config-file ../../models/fcos_R_50_FPN_1x_v01/config.yaml --num-gpus 1`
-### Stage 3: Plot generation [[generatePlots.py](ownCode/generatePlots.py)]
+### Stage 3: Plot generation [[generatePlots.py](generation/generatePlots.py)]
 Previous changes:
 - Adjust args parameters: --model-name and --dataset-name
 
 `generatePlots.py --model-name fcos_R_50_FPN_1x_v01 --dataset-name test`
-### Stage 4: Report generation [[generateReport.py](ownCode/generateReport.py)]
+### Stage 4: Report generation [[generateReport.py](generation/generateReport.py)]
 Previous changes:
 - Adjust args parameters: --model-name and --dataset-dir
 

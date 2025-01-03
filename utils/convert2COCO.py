@@ -5,11 +5,11 @@ from detectron2.data.catalog import DatasetCatalog
 from detectron2.data.datasets import register_coco_instances
 
 if __name__ == "__main__":
-    imagesDir = '/media/naeem/T7/datasets/Corn_syn_dataset/corn_dataset_v2/camera_main_camera/rect'
-    ogAnnsDir = '/media/naeem/T7/datasets/Corn_syn_dataset/corn_dataset_v2/camera_main_camera_annotations/bounding_box'
+    imagesDir = '/datasets/Corn_syn_dataset/corn_dataset_v2/camera_main_camera/rect'
+    ogAnnsDir = '/datasets/Corn_syn_dataset/corn_dataset_v2/camera_main_camera_annotations/bounding_box'
 
     datasetName = 'syn_coco_box'
-    newAnnsDir = f'/media/naeem/T7/datasets/Corn_syn_dataset/corn_dataset_v2/{datasetName}'
+    newAnnsDir = f'/datasets/Corn_syn_dataset/corn_dataset_v2/{datasetName}'
 
     newAnns = {}
 

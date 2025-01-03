@@ -31,18 +31,12 @@ logger = logging.getLogger("detectron2")
 def register_dataset():
     from detectron2.data.datasets import register_coco_instances
 
-    # register_coco_instances("maize_train", {},
-    #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_train.json",
-    #                         "/media/naeem/T7/datasets/maize_data_coco")
     register_coco_instances("maize_train", {},
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/trainNewAnnotations.json',
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/train/images')
-    # register_coco_instances("maize_valid", {},
-    #                         "/media/naeem/T7/datasets/maize_data_coco/annotations/instances_val.json",
-    #                         "/media/naeem/T7/datasets/maize_data_coco")
+                            '/corn_dataset_v2/COCOFormat/train/trainNewAnnotations.json',
+                            '/corn_dataset_v2/COCOFormat/train/images')
     register_coco_instances("maize_valid", {},
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/test/testNewAnnotations.json',
-                            'C:/Users/Inaki/Desktop/corn_dataset_v2/COCOFormat/test/images')
+                            '/corn_dataset_v2/COCOFormat/test/testNewAnnotations.json',
+                            '/corn_dataset_v2/COCOFormat/test/images')
 
 def do_test(cfg, model):
     ret = inference_on_dataset(
@@ -73,7 +67,6 @@ def measure():
 args = default_argument_parser().parse_args()
 cfg = LazyConfig.load(args.config_file)
 model_name = args.config_file.split('/')[-2]  # Assuming the config.yaml file is saved in a folder named as the model
-# cfg.train.output_dir = "/media/naeem/T7/trainers/fcos_R_50_FPN_1x.py/output/"
 cfg.train.output_dir = os.path.join(os.pardir, os.pardir, 'models', model_name, 'evaluation', 'test')
 cfg.dataloader.test.num_workers = 0  # for debugging
 # cfg = LazyConfig.apply_overrides(cfg, args.opts)

@@ -1,6 +1,5 @@
 # Scientific Project
 
-
 This project is based in the detectron2 repository (https://github.com/facebookresearch/detectron2). It consists of a general pipeline with the following steps:
 
 ![Pipeline](/docs/pipeline.png)
@@ -70,6 +69,8 @@ The model can be exported with the following command [[export_lazy_config.py](de
 
 `export_lazy_config.py --config-file ../../../models/fcos_R_50_FPN_1x_v01/config.yaml --format torchscript --output /Scientific-Project/export-output`
 
+## Atribuciones y Créditos
 
+Este proyecto hace uso de código del proyecto [facebookresearch/detectron2](https://github.com/facebookresearch/detectron2?tab=Apache-2.0-1-ov-file), licenciado bajo **Apache-2.0 License**.
 
 
